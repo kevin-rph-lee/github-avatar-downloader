@@ -1,5 +1,5 @@
-
 const env = require('dotenv').config();
+
 
 const request = require('request');
 const fs = require('fs');
@@ -15,9 +15,20 @@ function getRepoContributors(repoOwner, repoName, callback) {
       'Authorization': 'token ' + process.env.GITHUB_API_TOKEN
     }
   }
-  request(options, function(err, res, body) {
-    callback(err, JSON.parse(body));
-  });
+
+  if (args[2] === undefined || args[3] === undefined){
+    console.log('Error! Missing arguments!');
+  } else if (args.length > 4){
+    console.log('Too many parameters!');
+  } else if (process.env.GITHUB_API_TOKEN === undefined){
+    console.log('Error! Missing token in .env file!!');
+  } else if (result.message === 'Bad credentials'){
+    console.log('Bad credentials!');
+  } else {
+    request(options, function(err, res, body) {
+      callback(err, JSON.parse(body));
+    });
+  }
 };
 
 
@@ -29,18 +40,9 @@ function downloadImageByURL(url, filePath) {
 console.log('Welcome to the GitHub Avatar Downloader!');
 
 getRepoContributors(args[2], args[3], function(err, result) {
-  if (args[2] === undefined || args[3] === undefined){
-    console.log('Error! Missing arguments!');
-  } else if (args.length > 3){
-    console.log('Too many parameters!');
-  } else if (process.env.GITHUB_API_TOKEN === undefined){
-    console.log('Error! Missing token in .env file!!');
-  }
-   else {
     for(var i = 0; i < result.length; i++){
       downloadImageByURL(result[i].avatar_url, './avatars/' + result[i].login);
     }
-  }
 });
 
 
